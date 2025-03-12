@@ -1,6 +1,7 @@
-﻿#include <flurry/hardware/lapic.h>
-
+﻿#include "flurry/asm_wrappers.h"
 #include "flurry/system/boot.h"
+
+#include <flurry/hardware/lapic.h>
 #include "flurry/log/tty.h"
 
 #include "flurry/cpu/gdt.h"
@@ -12,6 +13,8 @@
 
 #include "flurry/acpi/acpi.h"
 #include "flurry/acpi/madt.h"
+#include "flurry/hardware/ioapic.h"
+#include "flurry/interrupts/interrupts.h"
 #include "flurry/time/timer.h"
 
 
@@ -24,6 +27,7 @@ void kmain(BootInfo* boot_info) {
 
     gdt_init();
     idt_init();
+    interrupts_init();
     pmm_init(info->hhdm_offset, info->memory_map);
     vmm_init(info->hhdm_offset, info->memory_map, info->kernel_address);
     kmalloc_init();
@@ -33,15 +37,9 @@ void kmain(BootInfo* boot_info) {
     madt_init();
     lapic_init(info->hhdm_offset);
 
-    /*
-    #define SEC_TO_NS(sec) ((sec) * 1000000000ULL)
-    #define NS_TO_SEC(ns) ((ns) / 1000000000ULL)
+    ioapic_init(info->hhdm_offset);
 
-    while (true) {
-        kprintf("TIMER TEST :D\n");
-        timer_wait_ns(SEC_TO_NS(5));
-    }
-    */
+
 
     for (;;) { __asm__ volatile("hlt"); }
 }

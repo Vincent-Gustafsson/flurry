@@ -3,9 +3,10 @@
     push rbx
     push rcx
     push rdx
-    push rsi
     push rdi
+    push rsi
     push rbp
+
     push r8
     push r9
     push r10
@@ -25,47 +26,68 @@
     pop r10
     pop r9
     pop r8
+
     pop rbp
-    pop rdi
     pop rsi
+    pop rdi
     pop rdx
     pop rcx
     pop rbx
     pop rax
 %endmacro
 
-%macro INTERRUPT_NAME 1
-    dq __interrupt%1
-%endmacro
 
-%macro isr_err_stub 1
-isr_stub_%1:
-    push qword %1
-    jmp interrupt_stub
-%endmacro
-
-%macro isr_no_err_stub 1
-isr_stub_%1:
-    push qword 0   ; no error
-    push qword %1
-    jmp interrupt_stub
-%endmacro
 
 extern interrupt_dispatch
 
 interrupt_stub:
     PUSH_REGS
 
+    mov rax, cr0
+    push rax
+    mov rax, cr2
+    push rax
+    mov rax, cr3
+    push rax
+    mov rax, cr4
+    push rax
+
     mov rdi, rsp
     call interrupt_dispatch
-    mov rsp, rax
+    ;mov rsp, rax
+
+    pop rax
+    mov cr4, rax
+
+    pop rax
+    mov cr3, rax
+
+    pop rax
+    mov cr2, rax
+
+    pop rax
+    mov cr0, rax
 
     POP_REGS
-    ;remove the vector number + error code
-    add rsp, 16
+
+    add rsp, 16 ;remove the vector number + error code
 
     iretq
 
+%macro isr_err_stub 1
+isr_stub_%1:
+    push %1
+    jmp interrupt_stub
+%endmacro
+
+%macro isr_no_err_stub 1
+isr_stub_%1:
+    push 0   ; no error
+    push %1
+    jmp interrupt_stub
+%endmacro
+
+; ISR for CPU exceptions (0-31)
 isr_no_err_stub 0
 isr_no_err_stub 1
 isr_no_err_stub 2
@@ -74,6 +96,7 @@ isr_no_err_stub 4
 isr_no_err_stub 5
 isr_no_err_stub 6
 isr_no_err_stub 7
+
 isr_err_stub    8
 isr_no_err_stub 9
 isr_err_stub    10
@@ -82,27 +105,35 @@ isr_err_stub    12
 isr_err_stub    13
 isr_err_stub    14
 isr_no_err_stub 15
+
 isr_no_err_stub 16
 isr_err_stub    17
 isr_no_err_stub 18
 isr_no_err_stub 19
 isr_no_err_stub 20
-isr_no_err_stub 21
+isr_err_stub 21
 isr_no_err_stub 22
 isr_no_err_stub 23
+
 isr_no_err_stub 24
 isr_no_err_stub 25
 isr_no_err_stub 26
 isr_no_err_stub 27
 isr_no_err_stub 28
-isr_no_err_stub 29
+isr_err_stub 29
 isr_err_stub    30
 isr_no_err_stub 31
 
-global isr_stubs
-isr_stubs:
-    %assign i 0
-    %rep    32
-        dq isr_stub_%+i ; use DQ instead if targeting 64-bit
+%assign i 32
+%rep 224
+    isr_no_err_stub i
     %assign i i+1
 %endrep
+
+global isr_array
+isr_array:
+    %assign i 0
+    %rep 256
+        dq isr_stub_%+i
+    %assign i i+1
+    %endrep

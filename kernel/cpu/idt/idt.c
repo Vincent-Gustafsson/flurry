@@ -3,15 +3,37 @@
 
 #include "flurry/log/tty.h"
 
+#define K_CODE_SELECTOR 0x08
+#define IDT_MAX_DESCRIPTORS 256
 
-InterruptDescriptor idt[256];
-static IDTR idtr;
+#define INT_GATE 0x8E
+#define TRAP_GATE 0x8F
 
-static bool vectors[256];
-extern void* isr_stubs[];
+
+
+typedef struct {
+    uint16_t    isr_low;      // The lower 16 bits of the ISR's address
+    uint16_t    kernel_cs;    // The GDT segment selector that the CPU will load into CS before calling the ISR
+    uint8_t	    ist;          // The IST in the TSS that the CPU will load into RSP; set to zero for now
+    uint8_t     attributes;   // Type and attributes; see the IDT page
+    uint16_t    isr_mid;      // The higher 16 bits of the lower 32 bits of the ISR's address
+    uint32_t    isr_high;     // The higher 32 bits of the ISR's address
+    uint32_t    reserved;     // Set to zero
+} __attribute__((packed)) IdtDescriptor;
+
+typedef struct {
+    uint16_t limit;
+    uint64_t base;
+} __attribute__((packed)) Idtr;
+
+
+static __attribute__((aligned(8))) IdtDescriptor idt[IDT_MAX_DESCRIPTORS];
+static Idtr idtr;
+
+extern void* isr_array[];
 
 static void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
-    InterruptDescriptor* descriptor = &idt[vector];
+    IdtDescriptor* descriptor = &idt[vector];
 
     descriptor->isr_low        = (uint64_t)isr & 0xFFFF;
     descriptor->kernel_cs      = K_CODE_SELECTOR;
@@ -23,16 +45,17 @@ static void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
 }
 
 void idt_init() {
-    idtr.base = idt;
-    idtr.limit = sizeof(InterruptDescriptor) * 256 - 1;
+    idtr.base = (uint64_t) &idt;
+    idtr.limit = (uint16_t)sizeof(IdtDescriptor) * IDT_MAX_DESCRIPTORS - 1;
 
-    for (uint8_t vector = 0; vector < 32; vector++) {
-        idt_set_descriptor(vector, isr_stubs[vector], INT_GATE);
-        vectors[vector] = true;
-    }
-
-    __asm__ volatile ("lidt %0" : : "m"(idtr)); // load the new IDT
-    __asm__ volatile ("sti"); // set the interrupt flag
+    for (uint16_t vector = 0; vector < IDT_MAX_DESCRIPTORS; vector++)
+        idt_set_descriptor(vector, isr_array[vector], 0x8E);
 
     kprintf("[IDT] Initialized\n");
+    idt_reload();
+    __asm__ volatile("sti");
+}
+
+void idt_reload() {
+    __asm__ volatile("lidt %0" : : "m"(idtr));
 }

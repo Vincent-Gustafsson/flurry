@@ -9,7 +9,7 @@ set(CMAKE_ASM_NASM_FLAGS "-f elf64")
 # Add your NASM source files
 set(ASM_SOURCES
     ../kernel/cpu/gdt/gdt.asm
-    ../kernel/cpu/idt/idt.asm
+    ../kernel/interrupts/isr.asm
 )
 
 # Compile NASM files
@@ -39,7 +39,7 @@ add_executable(flurry_os.bin
         kernel/string.c
         kernel/cpu/gdt/gdt.c
         kernel/cpu/idt/idt.c
-        kernel/cpu/idt/interrupts.c
+        kernel/interrupts/interrupts.c
         kernel/memory/pmm.c
         kernel/memory/vmm.c
         kernel/memory/paging.c
@@ -54,6 +54,8 @@ add_executable(flurry_os.bin
         kernel/hardware/lapic.c
         include/flurry/hardware/lapic.h
         include/flurry/hardware/lapic.h
+        kernel/hardware/ioapic.c
+        include/flurry/hardware/ioapic.h
 )
 
 # Link NASM objects with your main binary

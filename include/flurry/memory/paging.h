@@ -8,6 +8,7 @@
 #define VM_FLAG_PRESENT   (1ULL << 0)
 #define VM_FLAG_WRITE     (1ULL << 1)
 #define VM_FLAG_USER      (1ULL << 2)
+#define VM_FLAG_NO_CACHE     (1ULL << 4)
 #define VM_FLAG_NX        (1ULL << 63)
 #define VM_FLAG_DEFAULT   (0ULL)
 
