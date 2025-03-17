@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "flurry/common.h"
+#include "flurry/log/tty.h"
 #include "flurry/memory/pmm.h"
 #include "flurry/memory/vmm.h"
 

@@ -16,12 +16,14 @@
 #include "flurry/hardware/ioapic.h"
 #include "flurry/interrupts/interrupts.h"
 #include "flurry/time/timer.h"
+#include "flurry/multitasking/sched.h"
 
 
+void kmain();
 
 static BootInfo* info;
 
-void kmain(BootInfo* boot_info) {
+void kinit(BootInfo* boot_info) {
     info = boot_info;
     tty_init(info->fb->width, info->fb->height, info->fb->address);
 
@@ -39,7 +41,12 @@ void kmain(BootInfo* boot_info) {
 
     ioapic_init(info->hhdm_offset);
 
-
+    sched_init(kmain);
 
     for (;;) { __asm__ volatile("hlt"); }
+}
+
+void kmain() {
+    kprintf("Hello from first task\n");
+    while (true);
 }

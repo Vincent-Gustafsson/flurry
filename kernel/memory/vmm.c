@@ -76,6 +76,10 @@ void vmm_init(uintptr_t offset, PhysMemoryMap memmap, KernelAddress kernel_addre
     kprintf("[VMM] Initialized\n");
 }
 
+PhysAddr vmm_get_kernel_pml4() {
+    return kernel_pml4;
+}
+
 void vmm_load_pml4(PhysAddr pml4) {
     paging_load_pml4(pml4);
 }

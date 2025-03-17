@@ -1,5 +1,15 @@
-﻿#include <stddef.h>
+﻿#include "flurry/string.h"
+
+#include <stddef.h>
 #include <stdint.h>
+
+
+
+char* strcpy(char *strDest, const char *strSrc) {
+    char *temp = strDest;
+    while((*strDest++=*strSrc++) != '\0');
+    return temp;
+}
 
 // GCC and Clang reserve the right to generate calls to the following
 // 4 functions even if they are not directly called.

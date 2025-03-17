@@ -1,5 +1,10 @@
 ﻿#pragma once
-#include "flurry/log/tty.h"
+
+#include <stdint.h>
+
+#include "log/tty.h"
+
+typedef uint64_t PhysAddr;
 
 void kpanic();
 

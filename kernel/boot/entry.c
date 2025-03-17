@@ -25,7 +25,7 @@ LIMINE_REQUEST(rsdp_request, LIMINE_RSDP_REQUEST, 3);
 __attribute__((used, section(".limine_requests_end"))) static volatile LIMINE_REQUESTS_END_MARKER;
 
 
-extern void kmain(BootInfo* boot_info);
+extern void kinit(BootInfo* boot_info);
 static Framebuffer fb;
 
 void kentry() {
@@ -77,5 +77,5 @@ void kentry() {
     boot_info.kernel_address = (KernelAddress) { kernel_address_request.response->virtual_base, kernel_address_request.response->physical_base };
     boot_info.rsdp_address = (uintptr_t) rsdp_request.response->address;
 
-    kmain(&boot_info);
+    kinit(&boot_info);
 }

@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
 project(flurry_os C ASM_NASM)
 
-set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+set(CMAKE_C_FLAGS "-std=c11")
 
 set(CMAKE_ASM_NASM_FLAGS "-f elf64")
 
@@ -56,6 +59,13 @@ add_executable(flurry_os.bin
         include/flurry/hardware/lapic.h
         kernel/hardware/ioapic.c
         include/flurry/hardware/ioapic.h
+        kernel/multitasking/process.c
+        include/flurry/multitasking/process.h
+        kernel/multitasking/thread.c
+        include/flurry/multitasking/thread.h
+        include/flurry/string.h
+        kernel/multitasking/sched.c
+        include/flurry/multitasking/sched.h
 )
 
 # Link NASM objects with your main binary
