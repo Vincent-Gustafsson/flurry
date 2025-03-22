@@ -1,5 +1,6 @@
 ﻿#include "flurry/time/timer.h"
 
+#include "log.h"
 #include "flurry/log/tty.h"
 #include "../../include/flurry/acpi/hpet.h"
 
@@ -11,7 +12,7 @@ void timer_init(uintptr_t hhdm_offset) {
     hpet_init(hhdm_offset);
     timer.get_elapsed_ns = hpet_get_elapsed_ns;
     timer.reset = hpet_reset;
-    kprintf("[Timer] Initialized using HPET\n");
+    logln(LOG_INFO, "[Timer] Initialized using HPET");
 }
 
 uint64_t timer_get_elapsed_ns() {

@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 
+#include "log.h"
 #include "flurry/common.h"
 #include "flurry/acpi/madt.h"
 #include "flurry/interrupts/interrupts.h"
@@ -145,5 +146,5 @@ void ioapic_init(uintptr_t offset) {
     ioapic_addr = ioapic->ioapic_addr;
     vmm_kmap(ioapic_addr + hhdm_offset, ioapic_addr, VM_FLAG_WRITE | VM_FLAG_NX);
 
-    kprintf("[IOAPIC] Initialized\n");
+    logln(LOG_INFO, "[IOAPIC] Initialized\n");
 }

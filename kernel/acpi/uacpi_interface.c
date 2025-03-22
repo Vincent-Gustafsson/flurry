@@ -1,6 +1,7 @@
 ﻿#include <stdint.h>
 #include <flurry/common.h>
 
+#include "log.h"
 #include "flurry/log/tty.h"
 #include "flurry/memory/kmalloc.h"
 #include "uacpi/uacpi.h"
@@ -24,7 +25,7 @@ void acpi_init(uintptr_t rsdp, uintptr_t offset) {
 
     //uacpi_namespace_load();
     //uacpi_namespace_initialize();
-	kprintf("[ACPI] initialized\n");
+	logln(LOG_INFO, "[ACPI] initialized");
 }
 
 /* -- START -- setup_early_table_access requirements */

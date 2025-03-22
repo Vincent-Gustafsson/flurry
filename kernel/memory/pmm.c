@@ -2,6 +2,8 @@
 #include <string.h>
 
 #include "flurry/memory/pmm.h"
+
+#include "log.h"
 #include "flurry//log/tty.h"
 
 
@@ -34,7 +36,7 @@ void pmm_init(uintptr_t offset, PhysMemoryMap memory_map) {
         }
     }
 
-    kprintf("[PMM] Initialized with %d page frames\n", num_of_page_frames);
+    logln(LOG_INFO, "[PMM] Initialized with %d page frames", num_of_page_frames);
 }
 
 

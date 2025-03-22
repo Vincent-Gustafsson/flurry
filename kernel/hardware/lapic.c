@@ -5,6 +5,7 @@
 #include "flurry/asm_wrappers.h"
 #include <flurry/memory/vmm.h>
 
+#include "log.h"
 #include "flurry/acpi/madt.h"
 #include "flurry/interrupts/interrupts.h"
 #include "flurry/log/tty.h"
@@ -207,6 +208,6 @@ void lapic_init(uintptr_t offset) {
     write_reg(REG_TIMER_DIV, 0x3); // divider 16
     calibrate_timer();
 
-    kprintf("[LAPIC] Timer calibrated, %d ticks in 10 ms\n", lapic_calibration_ticks);
-    kprintf("[LAPIC] Initialized\n");
+    logln(LOG_DEBUG, "[LAPIC] Timer calibrated, %d ticks in 10 ms", lapic_calibration_ticks);
+    logln(LOG_INFO, "[LAPIC] Initialized");
 }

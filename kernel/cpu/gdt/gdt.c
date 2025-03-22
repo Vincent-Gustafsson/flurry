@@ -1,6 +1,7 @@
 ﻿#include "flurry/cpu/gdt.h"
 #include <stdint.h>
 
+#include "log.h"
 #include "flurry/log/tty.h"
 
 #define ENABLE_INTERRUPTS() asm volatile ("sti")
@@ -37,5 +38,5 @@ void gdt_init(void)
     reload_segments();
     ENABLE_INTERRUPTS();
 
-    kprintf("[GDT] Initialized\n");
+    logln(LOG_INFO, "[GDT] Initialized");
 }

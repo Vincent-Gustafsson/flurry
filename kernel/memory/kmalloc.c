@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include "log.h"
 #include "flurry/common.h"
 #include "flurry/log/tty.h"
 #include "flurry/memory/pmm.h"
@@ -298,5 +299,5 @@ void kmalloc_init() {
     unset_flag(head, FLAG_IS_PREV_FREE);
     freelist_add_node(head);
 
-    kprintf("[KMALLOC] Initialized with %dMiB of memory\n", HEAP_SIZE >> 20);
+    logln(LOG_INFO, "[KMALLOC] Initialized with %dMiB of memory", HEAP_SIZE >> 20);
 }

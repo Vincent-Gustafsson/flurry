@@ -1,5 +1,6 @@
 ﻿#include "flurry/interrupts/interrupts.h"
 
+#include "log.h"
 #include "flurry/common.h"
 #include "flurry/cpu/idt.h"
 #include "flurry/hardware/lapic.h"
@@ -17,12 +18,12 @@ static const uint8_t LAST_USABLE_VECTOR = 0xef;
 static uint16_t last_allocated_vector = FIRST_USABLE_VECTOR;
 static IntHandler int_handlers[IDT_MAX_DESCRIPTORS];
 
-void unknown_int_handler(InterruptCtx *ctx) {
+void unknown_int_handler(InterruptCtx* ctx) {
     kprintf("Unknown interrupt handler, vector: %d\n", ctx->vector);
     kpanic();
 }
 
-void pic_irq_handler(InterruptCtx *ctx) {
+void pic_irq_handler(InterruptCtx* ctx) {
     kprintf("Unexpected PIC IRQ received, vector: %d\n", ctx->vector);
 }
 
@@ -45,7 +46,7 @@ void cpu_exception_handler(InterruptCtx *ctx) {
             break;
 
         case 14:
-            kprintf("Page Fault, CR2: 0x%x\n", ctx->cr2);
+            kprintf("Page Fault\n");
         break;
         default:
             kprintf("IDK");
@@ -53,7 +54,7 @@ void cpu_exception_handler(InterruptCtx *ctx) {
     kpanic();
 }
 
-void interrupt_dispatch(InterruptCtx *ctx) {
+void interrupt_dispatch(InterruptCtx* ctx) {
     int_handlers[ctx->vector](ctx);
 }
 
@@ -85,5 +86,5 @@ void interrupts_init() {
         int_handlers[pic_irq + PIC2_IRQ_BASE] = pic_irq_handler;
     }
 
-    kprintf("[INTERRUPTS] initialized\n");
+    logln(LOG_INFO, "[INTERRUPTS] initialized");
 }

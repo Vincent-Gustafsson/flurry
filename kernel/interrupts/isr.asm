@@ -40,32 +40,13 @@
 
 extern interrupt_dispatch
 
+
+
 interrupt_stub:
     PUSH_REGS
 
-    mov rax, cr0
-    push rax
-    mov rax, cr2
-    push rax
-    mov rax, cr3
-    push rax
-    mov rax, cr4
-    push rax
-
     mov rdi, rsp
     call interrupt_dispatch
-
-    pop rax
-    mov cr4, rax
-
-    pop rax
-    mov cr3, rax
-
-    pop rax
-    mov cr2, rax
-
-    pop rax
-    mov cr0, rax
 
     POP_REGS
 

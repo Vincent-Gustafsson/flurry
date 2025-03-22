@@ -13,6 +13,7 @@ set(CMAKE_ASM_NASM_FLAGS "-f elf64")
 set(ASM_SOURCES
     ../kernel/cpu/gdt/gdt.asm
     ../kernel/interrupts/isr.asm
+    ../kernel/multitasking/sched.asm
 )
 
 # Compile NASM files
@@ -66,6 +67,8 @@ add_executable(flurry_os.bin
         include/flurry/string.h
         kernel/multitasking/sched.c
         include/flurry/multitasking/sched.h
+        log.c
+        include/log.h
 )
 
 # Link NASM objects with your main binary

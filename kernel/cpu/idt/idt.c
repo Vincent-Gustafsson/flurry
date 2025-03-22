@@ -1,6 +1,7 @@
 ﻿#include "flurry/cpu/idt.h"
 #include <stdbool.h>
 
+#include "log.h"
 #include "flurry/log/tty.h"
 
 #define K_CODE_SELECTOR 0x08
@@ -51,7 +52,7 @@ void idt_init() {
     for (uint16_t vector = 0; vector < IDT_MAX_DESCRIPTORS; vector++)
         idt_set_descriptor(vector, isr_array[vector], 0x8E);
 
-    kprintf("[IDT] Initialized\n");
+    logln(LOG_INFO, "[IDT] Initialized");
     idt_reload();
     __asm__ volatile("sti");
 }

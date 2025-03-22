@@ -3,6 +3,7 @@
 #include "limine.h"
 #include "flurry/memory/vmm.h"
 
+#include "log.h"
 #include "flurry/log/tty.h"
 #include "flurry/memory/pmm.h"
 #include "flurry/memory/paging.h"
@@ -73,7 +74,7 @@ void vmm_init(uintptr_t offset, PhysMemoryMap memmap, KernelAddress kernel_addre
     }
 
     vmm_load_pml4(kernel_pml4);
-    kprintf("[VMM] Initialized\n");
+    logln(LOG_INFO, "[VMM] Initialized");
 }
 
 PhysAddr vmm_get_kernel_pml4() {

@@ -1,8 +1,9 @@
-﻿#include "flurry/asm_wrappers.h"
-#include "flurry/system/boot.h"
+﻿#include "flurry/system/boot.h"
 
 #include <flurry/hardware/lapic.h>
-#include "flurry/log/tty.h"
+//#include "flurry/log/tty.h"
+
+#include <flurry/log/tty.h>
 
 #include "flurry/cpu/gdt.h"
 #include "flurry/cpu/idt.h"
@@ -18,6 +19,7 @@
 #include "flurry/time/timer.h"
 #include "flurry/multitasking/sched.h"
 
+#include "log.h"
 
 void kmain();
 
@@ -41,12 +43,7 @@ void kinit(BootInfo* boot_info) {
 
     ioapic_init(info->hhdm_offset);
 
-    sched_init(kmain);
+    sched_init();
 
     for (;;) { __asm__ volatile("hlt"); }
-}
-
-void kmain() {
-    kprintf("Hello from first task\n");
-    while (true);
 }
