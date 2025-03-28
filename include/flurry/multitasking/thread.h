@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "events.h"
 #include "flurry/multitasking/process.h"
 #include "flurry/interrupts/interrupts.h"
 
@@ -11,8 +12,9 @@ typedef struct Process Process;
 
 typedef enum {
     THREAD_READY,
-    THREAD_BLOCKED,
     THREAD_RUNNING,
+    THREAD_SLEEPING,
+    THREAD_BLOCKED,
     THREAD_DONE,
 } ThreadStatus;
 
@@ -33,6 +35,9 @@ typedef struct Thread {
     Process* process;
     char name[THREAD_MAX_NAME_LENGTH];
     ThreadStatus status;
+    Event* event;
+
+    uint64_t sleep_until;
 
     struct Thread* next;
 } Thread;

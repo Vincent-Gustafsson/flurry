@@ -4,6 +4,7 @@
 #include "flurry/common.h"
 #include "flurry/cpu/idt.h"
 #include "flurry/hardware/lapic.h"
+#include "flurry/hardware/tsc.h"
 #include "flurry/log/tty.h"
 
 #define IDT_MAX_DESCRIPTORS 256
@@ -55,6 +56,7 @@ void cpu_exception_handler(InterruptCtx *ctx) {
 }
 
 void interrupt_dispatch(InterruptCtx* ctx) {
+    logln(LOG_DEBUG, "Now in interrupt_dispatch %lu", tsc_read_ns());
     int_handlers[ctx->vector](ctx);
 }
 

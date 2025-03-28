@@ -3,6 +3,7 @@
 #include <flurry/hardware/lapic.h>
 //#include "flurry/log/tty.h"
 
+#include <flurry/common.h>
 #include <flurry/log/tty.h>
 
 #include "flurry/cpu/gdt.h"
@@ -20,10 +21,18 @@
 #include "flurry/multitasking/sched.h"
 
 #include "log.h"
+#include "flurry/hardware/tsc.h"
 
 void kmain();
 
 static BootInfo* info;
+
+uint64_t testt;
+
+void test(InterruptCtx* _) {
+    logln(LOG_DEBUG, "Time: %llu ns; Diff: %llu ns", tsc_read_ns() - testt, tsc_read_ns() - testt - from_ms(50));
+    lapic_eoi();
+}
 
 void kinit(BootInfo* boot_info) {
     info = boot_info;
@@ -43,7 +52,24 @@ void kinit(BootInfo* boot_info) {
 
     ioapic_init(info->hhdm_offset);
 
-    sched_init();
+    tsc_init();
 
+    interrupts_set_handler(32, test);
+    testt = tsc_read_ns();
+    logln(LOG_DEBUG, "Before: %llu ns", testt);
+    lapic_timer_one_shot(from_ms(50), 32);
+
+
+    /*
+
+
+    uint64_t now = tsc_read_ns();
+    logln(LOG_DEBUG, "Before: %llu ns, ticks: %llu", now);
+    lapic_timer_one_shot(from_ms(50), 32);
+    //lapic_timer_tsc_deadline(now + from_ms(5000), 32);
+
+    //sched_init();
+
+    */
     for (;;) { __asm__ volatile("hlt"); }
 }

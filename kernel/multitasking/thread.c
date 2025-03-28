@@ -7,6 +7,7 @@
 #include "flurry/string.h"
 #include "flurry/log/tty.h"
 #include "flurry/memory/kmalloc.h"
+#include "flurry/multitasking/events.h"
 
 #define STACK_SIZE 4096 * 4
 
@@ -38,6 +39,7 @@ Thread* thread_kcreate(char* name, void (*entry)(void), Process* proc) {
 
     t->rsp = (uintptr_t) stack;
 
+    t->event = event_create();
     t->status = THREAD_READY;
 
     return t;

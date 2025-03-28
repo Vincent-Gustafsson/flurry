@@ -28,6 +28,7 @@ static void qemu_debug_print(const char* str) {
 #define COLOR_RESET "\033[0m"
 #define COLOR_DEBUG "\033[90m"  // Grey
 #define COLOR_INFO  "\033[36m"  // Cyan
+#define COLOR_NORMAL  "\033[37m"  // White
 #define COLOR_ERROR "\033[31m"  // Red
 
 // Internal helper: prints the log with color, level prefix, and optional newline.
@@ -43,6 +44,10 @@ static void qemu_debug_log_internal(LogLevel level, int append_newline, const ch
         case LOG_INFO:
             color = COLOR_INFO;
         level_str = "[INFO] ";
+        break;
+        case LOG_NORMAL:
+            color = COLOR_NORMAL;
+        level_str = "";
         break;
         case LOG_ERROR:
             color = COLOR_ERROR;

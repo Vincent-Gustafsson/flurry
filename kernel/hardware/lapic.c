@@ -2,11 +2,14 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <flurry/common.h>
+
 #include "flurry/asm_wrappers.h"
 #include <flurry/memory/vmm.h>
 
 #include "log.h"
 #include "flurry/acpi/madt.h"
+#include "flurry/hardware/tsc.h"
 #include "flurry/interrupts/interrupts.h"
 #include "flurry/log/tty.h"
 #include "flurry/time/timer.h"
@@ -59,7 +62,7 @@ static uintptr_t hhdm_offset;
 static uintptr_t lapic_phys_base;
 static uintptr_t lapic_base;
 
-static uint32_t lapic_calibration_ticks; // TODO, move to CPU struct
+static uint64_t lapic_calibration_ticks; // TODO, move to CPU struct
 
 static const uint16_t PIC1_COMMAND_PORT = 0x20;
 static const uint16_t PIC1_DATA_PORT = 0x21;
@@ -155,18 +158,46 @@ void lapic_timer_stop() {
 }
 
 static void calibrate_timer() {
-    uint32_t start_ticks = UINT32_MAX;
+    // Set the LAPIC divider to 16.
+    // On many systems, writing 0x3 to REG_TIMER_DIV corresponds to divide-by-16.
+    write_reg(REG_TIMER_DIV, 0x3);
 
-    write_reg(REG_TIMER_INIT_COUNT, start_ticks);
-    timer_wait_ns(10000000); // 10 ms
-    uint32_t end_ticks = read_reg(REG_TIMER_CURR_COUNT);
+    // Mask the LAPIC timer interrupt during calibration.
+    //write_reg(REG_LVT_TIMER, 0x10000);
 
-    lapic_timer_stop();
-    lapic_calibration_ticks = start_ticks - end_ticks;
+    // We'll use a 10ms calibration interval.
+    const uint64_t calibration_interval_ns = 10000000ULL;
+    const int iterations = 5;
+    uint64_t total_ticks = 0;
+
+    for (int i = 0; i < iterations; i++) {
+        // Load the timer with the maximum count.
+        uint32_t init_count = UINT32_MAX;
+        write_reg(REG_TIMER_INIT_COUNT, init_count);
+
+        // Wait for the calibration interval.
+        timer_wait_ns(calibration_interval_ns);
+
+        // Read the current count.
+        uint32_t current_count = read_reg(REG_TIMER_CURR_COUNT);
+
+        // Calculate the number of ticks elapsed in this iteration.
+        uint32_t ticks_elapsed = init_count - current_count;
+        total_ticks += ticks_elapsed;
+    }
+
+    // Average the calibration ticks.
+    lapic_calibration_ticks = total_ticks / iterations;
+
+    logln(LOG_DEBUG, "[LAPIC] Timer calibrated: %lu ticks in %lu ns (averaged over %d iterations)",
+          lapic_calibration_ticks, calibration_interval_ns, iterations);
 }
 
-static inline uint32_t ns_to_lapic_ticks(uint64_t ns) {
-    return ns * lapic_calibration_ticks / 10000000;
+uint64_t ns_to_lapic_ticks(uint64_t ns) {
+    // Since lapic_calibration_ticks is measured over 10ms (10,000,000 ns),
+    // we can scale it:
+    //    ticks = ns * (lapic_calibration_ticks / 10,000,000)
+    return (ns * lapic_calibration_ticks) / 10000000ULL;
 }
 
 void lapic_eoi() {
@@ -174,15 +205,23 @@ void lapic_eoi() {
 }
 
 void lapic_timer_one_shot(uint64_t ns, uint8_t vec) {
-    uint32_t ticks = ns_to_lapic_ticks(ns);
-    write_reg(REG_TIMER_INIT_COUNT, ticks);
+    logln(LOG_DEBUG, "before one: %llu ns", tsc_read_ns());
+    uint32_t ticks = clamp(ns_to_lapic_ticks(ns), 1, UINT32_MAX);
     write_reg(REG_LVT_TIMER, LVT_TIMER_ONE_SHOT | vec);
+    write_reg(REG_TIMER_INIT_COUNT, ticks);
+    logln(LOG_DEBUG, "after one: %llu ns", tsc_read_ns());
 }
 
 void lapic_timer_periodic(uint64_t ns, uint8_t vec) {
-    uint32_t ticks = ns_to_lapic_ticks(ns);
-    write_reg(REG_TIMER_INIT_COUNT, ticks);
+    uint32_t ticks = clamp(ns_to_lapic_ticks(ns), 1, UINT32_MAX);
     write_reg(REG_LVT_TIMER, LVT_TIMER_PERIODIC | vec);
+    write_reg(REG_TIMER_INIT_COUNT, ticks);
+}
+
+void lapic_timer_tsc_deadline(uint64_t deadline, uint8_t vec) {
+    uint64_t delta = deadline - tsc_read_ns();
+    logln(LOG_DEBUG, "tsc_deadline delta: %lu ns", delta);
+    lapic_timer_one_shot(delta, vec);
 }
 
 void lapic_init(uintptr_t offset) {
@@ -204,10 +243,8 @@ void lapic_init(uintptr_t offset) {
     // Configure NMI sources
     configure_nmis(madt_get_lapic_nmis());
 
-    // Setup LAPIC timer
-    write_reg(REG_TIMER_DIV, 0x3); // divider 16
     calibrate_timer();
 
-    logln(LOG_DEBUG, "[LAPIC] Timer calibrated, %d ticks in 10 ms", lapic_calibration_ticks);
+    logln(LOG_DEBUG, "[LAPIC] Timer calibrated, %lu ticks in 10 ms", lapic_calibration_ticks);
     logln(LOG_INFO, "[LAPIC] Initialized");
 }

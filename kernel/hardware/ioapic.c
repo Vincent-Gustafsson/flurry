@@ -146,5 +146,5 @@ void ioapic_init(uintptr_t offset) {
     ioapic_addr = ioapic->ioapic_addr;
     vmm_kmap(ioapic_addr + hhdm_offset, ioapic_addr, VM_FLAG_WRITE | VM_FLAG_NX);
 
-    logln(LOG_INFO, "[IOAPIC] Initialized\n");
+    logln(LOG_INFO, "[IOAPIC] Initialized");
 }
