@@ -1,18 +1,29 @@
 ﻿#pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
+
+#include "flurry/multitasking/thread.h"
+#include "log.h"
 
 typedef void (*EventCallback)(void* arg);
 
+typedef struct Thread Thread;
+
 /* One event per Thread. */
 typedef struct Event {
-    uint64_t deadline;
+    Thread* owner;
+
+    uint64_t time;
+    bool enqueued;
 
     EventCallback callback;
+    char* kind;
     void* callback_arg;
 
-    struct Event* prev;
-    struct Event* next;
+    struct Event* left;
+    struct Event* right;
+    struct Event* parent;
 } Event;
 
 /* Creates an empty event. */
@@ -23,7 +34,7 @@ Event* event_create();
  */
 void event_destroy(Event* to_destroy);
 
-/* Inserts an event according to its deadline. */
+/* Inserts an event according to its time. */
 void event_enqueue(Event* to_insert);
 
 /* Remove an element. */
@@ -34,4 +45,6 @@ Event* event_dequeue();
 
 /* Get the first element in the queue without dequeuing it */
 Event* event_peek_next();
+
+void print_event_queue(LogLevel level);
 

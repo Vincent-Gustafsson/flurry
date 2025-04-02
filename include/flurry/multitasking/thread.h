@@ -18,10 +18,16 @@ typedef enum {
     THREAD_DONE,
 } ThreadStatus;
 
+typedef struct Thread Thread;
+
 typedef struct {
     uint64_t r12, r13, r14, r15, rbp, rbx, rflags;
-    uint64_t entry;
+
+    void (*init_thread)(Thread *prev);
+    void (*entry)();
 } __attribute__((packed)) InitialKStack;
+
+typedef struct Event Event;
 
 typedef struct Thread {
     uintptr_t rsp;

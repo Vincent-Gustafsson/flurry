@@ -56,7 +56,6 @@ void cpu_exception_handler(InterruptCtx *ctx) {
 }
 
 void interrupt_dispatch(InterruptCtx* ctx) {
-    logln(LOG_DEBUG, "Now in interrupt_dispatch %lu", tsc_read_ns());
     int_handlers[ctx->vector](ctx);
 }
 

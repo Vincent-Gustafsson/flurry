@@ -73,6 +73,7 @@ add_executable(flurry_os.bin
         include/flurry/multitasking/events.h
         kernel/hardware/tsc.c
         include/flurry/hardware/tsc.h
+        include/flurry/cpu/msr.h
 )
 
 # Link NASM objects with your main binary

@@ -158,15 +158,9 @@ void lapic_timer_stop() {
 }
 
 static void calibrate_timer() {
-    // Set the LAPIC divider to 16.
-    // On many systems, writing 0x3 to REG_TIMER_DIV corresponds to divide-by-16.
     write_reg(REG_TIMER_DIV, 0x3);
 
-    // Mask the LAPIC timer interrupt during calibration.
-    //write_reg(REG_LVT_TIMER, 0x10000);
-
-    // We'll use a 10ms calibration interval.
-    const uint64_t calibration_interval_ns = 10000000ULL;
+    const uint64_t calibration_interval_ns = 100000000ULL;
     const int iterations = 5;
     uint64_t total_ticks = 0;
 
@@ -197,7 +191,7 @@ uint64_t ns_to_lapic_ticks(uint64_t ns) {
     // Since lapic_calibration_ticks is measured over 10ms (10,000,000 ns),
     // we can scale it:
     //    ticks = ns * (lapic_calibration_ticks / 10,000,000)
-    return (ns * lapic_calibration_ticks) / 10000000ULL;
+    return (ns * lapic_calibration_ticks) / 100000000ULL;
 }
 
 void lapic_eoi() {
@@ -205,11 +199,9 @@ void lapic_eoi() {
 }
 
 void lapic_timer_one_shot(uint64_t ns, uint8_t vec) {
-    logln(LOG_DEBUG, "before one: %llu ns", tsc_read_ns());
     uint32_t ticks = clamp(ns_to_lapic_ticks(ns), 1, UINT32_MAX);
     write_reg(REG_LVT_TIMER, LVT_TIMER_ONE_SHOT | vec);
     write_reg(REG_TIMER_INIT_COUNT, ticks);
-    logln(LOG_DEBUG, "after one: %llu ns", tsc_read_ns());
 }
 
 void lapic_timer_periodic(uint64_t ns, uint8_t vec) {
