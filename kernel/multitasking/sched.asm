@@ -1,5 +1,3 @@
-global switch_context
-
 struc Thread
     .rsp resq 1
     ; ...
@@ -8,6 +6,7 @@ endstruc
 ; Thread* switch_context(Thread* old, Thread* new);
 ;     rdi: old
 ;     rsi: new
+global switch_context
 switch_context:
     ; Save old thread's rflags
     pushfq
@@ -39,3 +38,7 @@ switch_context:
     ; Return the old thread
     mov rax, rdi
     ret
+
+global enter_userspace
+enter_userspace:
+

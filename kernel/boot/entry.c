@@ -21,6 +21,7 @@ LIMINE_REQUEST(hhdm_request, LIMINE_HHDM_REQUEST, 3);
 LIMINE_REQUEST(framebuffer_request, LIMINE_FRAMEBUFFER_REQUEST, 3);
 LIMINE_REQUEST(kernel_address_request, LIMINE_KERNEL_ADDRESS_REQUEST, 3);
 LIMINE_REQUEST(rsdp_request, LIMINE_RSDP_REQUEST, 3);
+LIMINE_REQUEST(module_request, LIMINE_MODULE_REQUEST, 3);
 
 __attribute__((used, section(".limine_requests_end"))) static volatile LIMINE_REQUESTS_END_MARKER;
 
@@ -36,6 +37,7 @@ void kentry() {
     kassert(framebuffer_request.response, "Unable to get the framebuffer!");
     kassert(kernel_address_request.response, "Unable to get the kernel address info!");
     kassert(rsdp_request.response, "Unable to get the rsdp address!");
+    kassert(module_request.response, "Unable to get the modules");
 
     // Get the memory map
     struct limine_memmap_response* mm_res = memmap_request.response;
@@ -76,6 +78,19 @@ void kentry() {
     boot_info.fb = &fb;
     boot_info.kernel_address = (KernelAddress) { kernel_address_request.response->virtual_base, kernel_address_request.response->physical_base };
     boot_info.rsdp_address = (uintptr_t) rsdp_request.response->address;
+
+    struct limine_module_response* module_res = module_request.response;
+
+    for (size_t i = 0; i < module_res->module_count; i++) {
+        struct limine_file* module = module_res->modules[i];
+        boot_info.modules[i] = (Module) {
+            .address = module->address,
+            .size = module->size,
+            .path = module->path,
+            .cmdline = module->cmdline
+        };
+    }
+
 
     kinit(&boot_info);
 }

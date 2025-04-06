@@ -47,3 +47,9 @@ Thread* thread_kcreate(char* name, void (*entry)(void), Process* proc) {
 
     return t;
 }
+
+Thread* thread_ucreate(char* name, void (*entry)(void), Process* proc) {
+    Thread* t = kmalloc(sizeof(Thread));
+
+    
+}

@@ -74,6 +74,10 @@ add_executable(flurry_os.bin
         kernel/hardware/tsc.c
         include/flurry/hardware/tsc.h
         include/flurry/cpu/msr.h
+        kernel/syscalls/syscall.c
+        include/flurry/syscalls/syscall.h
+        kernel/abi/sysv/elf.c
+        include/flurry/abi/sysv/elf.h
 )
 
 # Link NASM objects with your main binary

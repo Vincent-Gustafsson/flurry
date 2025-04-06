@@ -49,3 +49,4 @@ typedef struct Thread {
 } Thread;
 
 Thread* thread_kcreate(char* name, void (*entry)(void), Process* proc);
+Thread* thread_ucreate(char* name, void (*entry)(void), Process* proc);

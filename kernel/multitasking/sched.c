@@ -300,5 +300,7 @@ void sched_init() {
     init_thread->event->callback = switch_thread;
     event_enqueue(init_thread->event);
 
+    logln(LOG_INFO, "[SCHEDULER] Initialized");
+
     handle_next_event(NULL);
 }

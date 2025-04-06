@@ -10,9 +10,17 @@ typedef struct {
 } KernelAddress;
 
 typedef struct {
+    void* address;
+    uint64_t size;
+    char* path;
+    char* cmdline;
+} Module;
+
+typedef struct {
     PhysMemoryMap memory_map;
     uintptr_t hhdm_offset;
     Framebuffer* fb;
     KernelAddress kernel_address;
     uintptr_t rsdp_address;
+    Module modules[64];
 } BootInfo;

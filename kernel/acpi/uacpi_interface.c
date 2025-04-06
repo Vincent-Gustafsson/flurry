@@ -25,7 +25,7 @@ void acpi_init(uintptr_t rsdp, uintptr_t offset) {
 
     //uacpi_namespace_load();
     //uacpi_namespace_initialize();
-	logln(LOG_INFO, "[ACPI] initialized");
+	logln(LOG_INFO, "[ACPI] Initialized");
 }
 
 /* -- START -- setup_early_table_access requirements */

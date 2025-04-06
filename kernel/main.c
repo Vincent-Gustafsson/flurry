@@ -1,7 +1,6 @@
 ﻿#include "flurry/system/boot.h"
 
 #include <flurry/hardware/lapic.h>
-//#include "flurry/log/tty.h"
 
 #include <flurry/common.h>
 #include <flurry/log/tty.h>
@@ -18,9 +17,11 @@
 #include "flurry/hardware/ioapic.h"
 #include "flurry/interrupts/interrupts.h"
 #include "flurry/time/timer.h"
+#include "flurry/syscalls/syscall.h"
 #include "flurry/multitasking/sched.h"
 
 #include "log.h"
+#include "flurry/abi/sysv/elf.h"
 #include "flurry/hardware/tsc.h"
 
 void kmain();
@@ -47,6 +48,10 @@ void kinit(BootInfo* boot_info) {
 
     tsc_init();
 
+    ElfFile elf_file;
+    elf_read(&boot_info->modules[0], &elf_file);
+
+    syscall_init();
     sched_init();
 
     for (;;) { __asm__ volatile("hlt"); }
